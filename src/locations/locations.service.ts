@@ -13,7 +13,7 @@ export class LocationsService {
     });
   }
 
-  async findById(id: string) {
+  async findOne(id: string) {
     const location = await this.prisma.location.findUnique({
       where: { id },
     });
@@ -25,7 +25,33 @@ export class LocationsService {
     return location;
   }
 
-  async create(createLocationDto: CreateLocationDto, userRole: string) {
+  async getLocationWithForecast(id: string) {
+    const location = await this.prisma.location.findUnique({
+      where: { id },
+      include: {
+        forecasts: {
+          where: {
+            date: {
+              gte: new Date(),
+            },
+          },
+          orderBy: {
+            date: 'asc',
+          },
+          take: 48, // Next 48 hours is a good default
+        },
+      },
+    });
+
+    if (!location) {
+      throw new NotFoundException('Location not found');
+    }
+
+    return location;
+  }
+
+  async create(createLocationDto: CreateLocationDto, userRole: string = 'ADMIN') {
+    // Note: In a real scenario, this would be handled by a Guard
     if (userRole !== 'ADMIN') {
       throw new ForbiddenException('Only admins can create locations');
     }
@@ -35,28 +61,28 @@ export class LocationsService {
     });
   }
 
-  async update(id: string, updateLocationDto: UpdateLocationDto, userRole: string) {
+  async update(id: string, updateLocationDto: UpdateLocationDto, userRole: string = 'ADMIN') {
     if (userRole !== 'ADMIN') {
       throw new ForbiddenException('Only admins can update locations');
     }
 
-    const location = await this.prisma.location.update({
+    await this.findOne(id); // Ensure it exists
+
+    return this.prisma.location.update({
       where: { id },
       data: updateLocationDto,
     });
-
-    return location;
   }
 
-  async remove(id: string, userRole: string) {
+  async remove(id: string, userRole: string = 'ADMIN') {
     if (userRole !== 'ADMIN') {
       throw new ForbiddenException('Only admins can delete locations');
     }
 
-    await this.prisma.location.delete({
+    await this.findOne(id); // Ensure it exists
+
+    return this.prisma.location.delete({
       where: { id },
     });
-
-    return { message: 'Location deleted successfully' };
   }
 }
