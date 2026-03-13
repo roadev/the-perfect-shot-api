@@ -1,25 +1,4 @@
-import { IsString, IsNumber, Min, Max, IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateLocationDto } from './create-location.dto';
 
-export class UpdateLocationDto {
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @IsNumber()
-  @IsOptional()
-  latitude?: number;
-
-  @IsNumber()
-  @IsOptional()
-  longitude?: number;
-
-  @IsNumber()
-  @IsOptional()
-  elevation?: number;
-
-  @IsNumber()
-  @Min(1)
-  @Max(9)
-  @IsOptional()
-  bortleScale?: number;
-}
+export class UpdateLocationDto extends PartialType(CreateLocationDto) {}
