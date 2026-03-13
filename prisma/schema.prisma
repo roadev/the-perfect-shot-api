@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(USER)
+  photos       Photo[]
+  shootPlans   ShootPlan[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Curated locations only (e.g., Tatacoa Desert, specific National Parks)
+model Location {
+  id          String            @id @default(uuid())
+  name        String
+  latitude    Float
+  longitude   Float
+  elevation   Float?
+  bortleScale Int               // 1-9 scale for light pollution
+  photos      Photo[]
+  shootPlans  ShootPlan[]
+  forecasts   WeatherForecast[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Photo {
+  id              String   @id @default(uuid())
+  imageUrl        String
+  celestialTarget String?  // e.g., "Milky Way Core", "Orion Nebula"
+  cameraMetadata  Json?    // EXIF data like ISO, aperture, shutter speed
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  locationId      String
+  location        Location @relation(fields: [locationId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+model ShootPlan {
+  id         String   @id @default(uuid())
+  targetDate DateTime
+  notes      String?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Cached forecast data to prevent rate-limiting from public weather APIs
+model WeatherForecast {
+  id          String   @id @default(uuid())
+  date        DateTime // The specific hour/day this forecast applies to
+  cloudCover  Int      // Percentage 0-100
+  seeing      Float?   // Atmospheric seeing conditions
+  skyScore    Int?     // Calculated 0-100 score for astrophotography viability
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id])
+  retrievedAt DateTime @default(now())
+
+  @@unique([locationId, date]) // Ensure we don't have duplicate forecasts for the same hour/location
+}
+
+model CelestialEvent {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Perseids Meteor Shower"
+  startDate DateTime
+  peakDate  DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+}
