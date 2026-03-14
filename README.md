@@ -7,6 +7,7 @@ Backend API for astrophotography and landscape photography planning application.
 - **Framework**: NestJS
 - **ORM**: Prisma
 - **Database**: PostgreSQL (Docker)
+- - **Cloud Storage**: DigitalOcean Spaces (S3 compatible)
 - **Language**: TypeScript
 - **Package Manager**: pnpm
 
@@ -66,6 +67,7 @@ The API will be available at `http://localhost:3000/api`
 
 ### Photos
 - `GET /api/photos` - List user's photos
+- `GET /api/photos/upload-url` - Get a presigned URL for direct client-side upload to DO Spaces
 - `GET /api/photos/:id` - Get photo details
 - `POST /api/photos` - Upload a new photo
 - `PATCH /api/photos/:id` - Update photo metadata
@@ -95,6 +97,13 @@ Create a `.env` file in the root directory:
 DATABASE_URL="postgresql://postgres:postgres@localhost:6381/the-perfect-shot?schema=public"
 JWT_SECRET="your-super-secret-jwt-key-change-in-production"
 JWT_EXPIRES_IN="7d"
+
+# DigitalOcean Spaces
+DO_SPACES_ACCESS_KEY_ID="your-access-key"
+DO_SPACES_SECRET_ACCESS_KEY="your-secret-key"
+DO_SPACES_REGION="nyc3"
+DO_SPACES_ENDPOINT="https://nyc3.digitaloceanspaces.com"
+DO_SPACES_BUCKET="your-bucket-name"
 ```
 
 ## Building for Production

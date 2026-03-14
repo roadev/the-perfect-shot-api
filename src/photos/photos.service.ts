@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreatePhotoDto } from './dto/create-photo.dto';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 
 @Injectable()
 export class PhotosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   async findAllByUser(userId: string) {
     return this.prisma.photo.findMany({
@@ -89,5 +93,13 @@ export class PhotosService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async getUploadUrl(userId: string, fileName: string, contentType: string) {
+    const key = `users/${userId}/photos/${Date.now()}-${fileName}`;
+    const uploadUrl = await this.storageService.getPresignedUploadUrl(key, contentType);
+    const imageUrl = this.storageService.getFileUrl(key);
+    
+    return { uploadUrl, imageUrl, key };
   }
 }

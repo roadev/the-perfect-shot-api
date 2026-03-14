@@ -10,6 +10,7 @@ import { ShootPlansModule } from './shoot-plans/shoot-plans.module';
 import { WeatherForecastsModule } from './weather-forecasts/weather-forecasts.module';
 import { CelestialEventsModule } from './celestial-events/celestial-events.module';
 import { WeatherModule } from './weather/weather.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WeatherModule } from './weather/weather.module';
     WeatherForecastsModule,
     CelestialEventsModule,
     WeatherModule,
+    StorageModule,
   ],
 })
 export class AppModule {}

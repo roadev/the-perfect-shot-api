@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PhotosService } from './photos.service';
@@ -15,7 +16,6 @@ import { CreatePhotoDto } from './dto/create-photo.dto';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 
 @Controller('photos')
-@UseGuards(JwtAuthGuard)
 export class PhotosController {
   constructor(private photosService: PhotosService) {}
 
@@ -25,12 +25,23 @@ export class PhotosController {
     return this.photosService.findAllByUser(userId);
   }
 
+  @Get('upload-url')
+  @UseGuards(JwtAuthGuard)
+  async getUploadUrl(
+    @CurrentUser('id') userId: string,
+    @Query('fileName') fileName: string,
+    @Query('contentType') contentType: string,
+  ) {
+    return this.photosService.getUploadUrl(userId, fileName, contentType);
+  }
+
   @Get('public')
   async findAllPublic() {
     return this.photosService.findAllPublic();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async findById(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
@@ -39,6 +50,7 @@ export class PhotosController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() createPhotoDto: CreatePhotoDto,
     @CurrentUser('id') userId: string,
@@ -47,6 +59,7 @@ export class PhotosController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id') id: string,
     @Body() updatePhotoDto: UpdatePhotoDto,
@@ -56,6 +69,7 @@ export class PhotosController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async remove(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
