@@ -11,6 +11,6 @@ export class CreatePhotoDto {
   @IsOptional()
   cameraMetadata?: Record<string, any>;
 
-  @IsUUID()
+  @IsString()
   locationId: string;
 }
