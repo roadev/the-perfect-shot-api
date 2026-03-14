@@ -11,7 +11,13 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:3000', 
+      'http://localhost:3001', 
+      'http://localhost:7000',
+      'https://the-perfect-shot-app.vercel.app',
+      /\.vercel\.app$/, // Allow any vercel deployment
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
