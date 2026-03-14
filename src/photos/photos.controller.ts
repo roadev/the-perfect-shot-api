@@ -20,8 +20,14 @@ export class PhotosController {
   constructor(private photosService: PhotosService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(@CurrentUser('id') userId: string) {
     return this.photosService.findAllByUser(userId);
+  }
+
+  @Get('public')
+  async findAllPublic() {
+    return this.photosService.findAllPublic();
   }
 
   @Get(':id')

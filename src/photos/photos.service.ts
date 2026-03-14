@@ -75,4 +75,19 @@ export class PhotosService {
 
     return { message: 'Photo deleted successfully' };
   }
+
+  async findAllPublic() {
+    return this.prisma.photo.findMany({
+      take: 12,
+      include: { 
+        location: true,
+        user: {
+          select: {
+            email: true,
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
