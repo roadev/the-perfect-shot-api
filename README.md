@@ -1,114 +1,90 @@
-# The Perfect Shot - Backend API
+# The Perfect Shot - Core API 🌌
 
-Backend API for astrophotography and landscape photography planning application.
+> **The Backbone for Astrophotography Planning.**
 
-## Tech Stack
+The Perfect Shot is a high-performance backend API designed to solve the "Time & Place" problem for astrophotographers and landscape enthusiasts. It orchestrates weather data, celestial event tracking, and secure cloud storage to ensure photographers never miss a critical window.
 
-- **Framework**: NestJS
-- **ORM**: Prisma
-- **Database**: PostgreSQL (Docker)
-- - **Cloud Storage**: DigitalOcean Spaces (S3 compatible)
-- **Language**: TypeScript
-- **Package Manager**: pnpm
+## 🚀 Business Vision
 
-## Prerequisites
+Timing is everything in professional photography. A 10-minute window of clear skies or a specific lunar phase can be the difference between a masterpiece and a missed opportunity. This API provides the reliable infrastructure needed to:
+- **Predict**: Combine location-based weather with celestial events.
+- **Organize**: Curate shooting locations with historical and forecasted data.
+- **Scale**: Handle high-resolution media through secure, direct-to-cloud storage flows.
 
+## 🏗️ Architectural Decisions
+
+Built with a focus on **type-safety**, **modularity**, and **scalability**:
+
+- **NestJS (Node.js)**: Chosen for its modular architecture and enterprise-grade dependency injection, facilitating clean separation of concerns (Weather vs. Photos vs. Locations).
+- **Prisma & PostgreSQL**: Ensures a strictly typed database layer with highly efficient migration management.
+- **Direct-to-Cloud Storage Strategy**: Implemented a **Presigned URL** system for DigitalOcean Spaces (S3-compatible). This offloads heavy file uploads from the API server directly to the cloud, significantly reducing infrastructure overhead and latency for the end-user.
+- **JWT Authentication**: Secure, stateless auth flow using passport-jwt for cross-service compatibility.
+
+## 🛠️ Technical Deep Dive
+
+### Storage Service Abstraction
+The `StorageModule` implements a generic S3-compatible interface. This allows for easy swapping between DigitalOcean Spaces, AWS S3, or Minio without changing business logic in the `PhotosModule`.
+
+### Proactive Data Orchestration
+The API doesn't just store data; it curates it. The `WeatherModule` is designed to ingest multi-source data and provide specialized scores (like the "Clear Sky Score") tailored for long-exposure photography.
+
+---
+
+## 🚦 Getting Started
+
+### Prerequisites
 - Node.js 22+
 - pnpm
-- Docker & Docker Compose
+- Docker (for PostgreSQL)
 
-## Setup
+### Setup Instructions
 
-1. **Install dependencies**:
+1. **Install Dependencies**:
+   ```bash
+   pnpm install
+   ```
 
-```bash
-pnpm install
-```
+2. **Infrastructure**:
+   ```bash
+   docker compose up -d
+   ```
+   *Database runs at `localhost:6381`.*
 
-2. **Start PostgreSQL database**:
+3. **Database Preparation**:
+   ```bash
+   pnpm prisma generate
+   pnpm prisma migrate dev --name init
+   ```
 
-```bash
-docker compose up -d
-```
+4. **Run Development Server**:
+   ```bash
+   pnpm start:dev
+   ```
 
-The database will be available at `localhost:6381`.
+---
 
-3. **Generate Prisma client and run migrations**:
+## 📡 API Reference
 
-```bash
-pnpm prisma generate
-pnpm prisma migrate dev --name init
-```
+Explore the full interactive documentation at `http://localhost:7000/api/docs` (Swagger).
 
-4. **Start the development server**:
+### Core Domains:
+| Module | Endpoint | Description |
+| :--- | :--- | :--- |
+| **Auth** | `/api/auth/*` | Secure registration and JWT-based session management. |
+| **Locations** | `/api/locations` | Curated spots with Bortle Scale and elevation data. |
+| **Weather** | `/api/locations/:id/forecasts` | Deep-sky specific weather metrics and "Best Time" prediction. |
+| **Events** | `/api/celestial-events` | Tracking meteor showers, eclipses, and lunar phases. |
+| **Photos** | `/api/photos` | Managed upload flow with presigned S3 URLs and metadata tracking. |
 
-```bash
-pnpm start:dev
-```
+## 📦 Environment Variables
 
-The API will be available at `http://localhost:3000/api`
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login and receive JWT token
-
-### Users
-- `GET /api/users/me` - Get current user profile
-- `PATCH /api/users/me` - Update current user profile
-
-### Locations
-- `GET /api/locations` - List all curated locations
-- `GET /api/locations/:id` - Get location details
-- `POST /api/locations` - Create a new location (admin only)
-- `PATCH /api/locations/:id` - Update location (admin only)
-- `DELETE /api/locations/:id` - Delete location (admin only)
-
-### Photos
-- `GET /api/photos` - List user's photos
-- `GET /api/photos/upload-url` - Get a presigned URL for direct client-side upload to DO Spaces
-- `GET /api/photos/:id` - Get photo details
-- `POST /api/photos` - Upload a new photo
-- `PATCH /api/photos/:id` - Update photo metadata
-- `DELETE /api/photos/:id` - Delete a photo
-
-### Shoot Plans
-- `GET /api/shoot-plans` - List user's shoot plans
-- `GET /api/shoot-plans/:id` - Get shoot plan details
-- `POST /api/shoot-plans` - Create a new shoot plan
-- `PATCH /api/shoot-plans/:id` - Update shoot plan
-- `DELETE /api/shoot-plans/:id` - Delete shoot plan
-
-### Weather Forecasts
-- `GET /api/locations/:id/forecasts` - Get forecasts for a location
-- `GET /api/locations/:id/forecasts/best` - Get best times for astrophotography
-
-### Celestial Events
-- `GET /api/celestial-events` - List all celestial events
-- `GET /api/celestial-events/:id` - Get celestial event details
-- `POST /api/celestial-events` - Create celestial event (admin only)
-
-## Environment Variables
-
-Create a `.env` file in the root directory:
-
-```
+Create a `.env` file in the root:
+```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:6381/the-perfect-shot?schema=public"
-JWT_SECRET="your-super-secret-jwt-key-change-in-production"
-JWT_EXPIRES_IN="7d"
-
-# DigitalOcean Spaces
-DO_SPACES_ACCESS_KEY_ID="your-access-key"
-DO_SPACES_SECRET_ACCESS_KEY="your-secret-key"
+JWT_SECRET="your-secret-key"
+DO_SPACES_ACCESS_KEY_ID="xxx"
+DO_SPACES_SECRET_ACCESS_KEY="xxx"
 DO_SPACES_REGION="nyc3"
 DO_SPACES_ENDPOINT="https://nyc3.digitaloceanspaces.com"
-DO_SPACES_BUCKET="your-bucket-name"
-```
-
-## Building for Production
-
-```bash
-pnpm build
-pnpm start:prod
+DO_SPACES_BUCKET="astro-bucket"
 ```
